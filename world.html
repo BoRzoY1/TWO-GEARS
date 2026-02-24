@@ -2,9 +2,8 @@
 <html lang="ru">
 <head>
     <link rel="icon" type="image/png" href="favicon.png">
-
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>World - TWO GEARS</title>
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=JetBrains+Mono:wght@400;700&family=VT323&display=swap" rel="stylesheet">
     <style>
@@ -19,11 +18,12 @@
             --dark: #050505;
         }
 
-        body {
+        html, body {
             background: var(--dark);
             color: var(--amber);
             font-family: 'VT323', monospace;
-            min-height: 100vh;
+            min-height: 100%;
+            width: 100%;
             overflow-x: hidden;
         }
 
@@ -44,24 +44,25 @@
 
         .bezel {
             position: fixed;
-            top: 20px; left: 20px; right: 20px; bottom: 20px;
-            border: 25px solid #1a1a1a;
-            border-radius: 30px;
+            top: 10px; left: 10px; right: 10px; bottom: 10px;
+            border: 15px solid #1a1a1a;
+            border-radius: 20px;
             box-shadow: 
-                inset 0 0 150px rgba(0,0,0,0.9),
-                0 0 0 15px #0a0a0a,
-                0 0 0 20px var(--copper),
-                0 0 60px rgba(205, 127, 50, 0.4);
+                inset 0 0 100px rgba(0,0,0,0.9),
+                0 0 0 10px #0a0a0a,
+                0 0 0 12px var(--copper),
+                0 0 40px rgba(205, 127, 50, 0.4);
             pointer-events: none;
             z-index: 200;
         }
 
         .screen {
             position: absolute;
-            top: 45px; left: 45px; right: 45px; bottom: 45px;
-            padding: 2rem;
+            top: 25px; left: 25px; right: 25px; bottom: 25px;
+            padding: 1rem;
             overflow-y: auto;
             z-index: 10;
+            -webkit-overflow-scrolling: touch;
         }
 
         .header {
@@ -69,16 +70,19 @@
             justify-content: space-between;
             align-items: center;
             border-bottom: 2px solid var(--amber);
-            padding-bottom: 1rem;
-            margin-bottom: 2rem;
+            padding-bottom: 0.8rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 0.5rem;
         }
 
         .back-btn {
             color: var(--amber);
             text-decoration: none;
             border: 1px solid var(--amber);
-            padding: 0.5rem 1rem;
+            padding: 0.4rem 0.8rem;
             transition: all 0.3s;
+            font-size: clamp(0.8rem, 3vw, 1rem);
             position: relative;
             overflow: hidden;
         }
@@ -103,16 +107,15 @@
 
         .header-title {
             font-family: 'Bebas Neue', sans-serif;
-            font-size: 2rem;
-            letter-spacing: 0.2em;
+            font-size: clamp(1.2rem, 5vw, 2rem);
+            letter-spacing: 0.15em;
             text-shadow: 0 0 10px var(--amber);
         }
 
-        /* Ready assets */
         .asset-section {
             border: 3px solid var(--green);
-            padding: 2rem;
-            margin-bottom: 2rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
             background: rgba(51, 255, 0, 0.05);
             position: relative;
             box-shadow: 0 0 20px rgba(51, 255, 0, 0.1);
@@ -121,27 +124,33 @@
         .asset-section::before {
             content: '✓ READY';
             position: absolute;
-            top: -12px; left: 20px;
+            top: -10px;
+            left: 10px;
             background: var(--dark);
-            padding: 0 10px;
+            padding: 0 8px;
             color: var(--green);
-            font-size: 0.9rem;
+            font-size: clamp(0.7rem, 2.5vw, 0.9rem);
             border: 1px solid var(--green);
         }
 
         .asset-title {
             font-family: 'Bebas Neue', sans-serif;
-            font-size: 2rem;
+            font-size: clamp(1.5rem, 6vw, 2rem);
             color: var(--green);
             margin-bottom: 1rem;
             text-shadow: 0 0 10px var(--green);
         }
 
+        .asset-section > p {
+            font-size: clamp(0.9rem, 3.5vw, 1rem);
+            margin-bottom: 1rem;
+        }
+
         .asset-grid {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 1rem;
-            margin: 1.5rem 0;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.5rem;
+            margin: 1rem 0;
         }
 
         .asset-item {
@@ -152,12 +161,13 @@
             align-items: center;
             justify-content: center;
             color: var(--green);
-            font-size: 0.85rem;
+            font-size: 0.75rem;
             text-align: center;
             position: relative;
             cursor: pointer;
             transition: all 0.3s;
             overflow: hidden;
+            min-height: 80px;
         }
 
         .asset-item:hover {
@@ -179,14 +189,13 @@
             opacity: 1;
         }
 
-        /* Steampunk Video Player */
         .steampunk-player {
             width: 100%;
             margin-top: 1rem;
             background: linear-gradient(135deg, #1a0f0a 0%, #0d0505 100%);
             border: 3px solid var(--copper);
             border-radius: 8px;
-            padding: 8px;
+            padding: 6px;
             position: relative;
             box-shadow: 
                 inset 0 0 20px rgba(0,0,0,0.8),
@@ -215,26 +224,28 @@
             width: 100%;
             height: auto;
             display: block;
+            max-height: 50vh;
         }
 
         .player-controls {
             display: flex;
             align-items: center;
-            gap: 10px;
-            padding: 10px;
+            gap: 8px;
+            padding: 8px;
             background: linear-gradient(to bottom, #2a1f15, #1a120a);
             border-top: 2px solid var(--copper);
             margin-top: 4px;
+            flex-wrap: wrap;
         }
 
         .control-btn {
-            width: 40px;
-            height: 40px;
+            width: 36px;
+            height: 36px;
             background: radial-gradient(circle at 30% 30%, #4a3728, #1a120a);
             border: 2px solid var(--copper);
             border-radius: 50%;
             color: var(--amber);
-            font-size: 1.2rem;
+            font-size: 1rem;
             cursor: pointer;
             display: flex;
             align-items: center;
@@ -244,6 +255,7 @@
                 inset 0 2px 4px rgba(255,255,255,0.1),
                 0 4px 8px rgba(0,0,0,0.5);
             position: relative;
+            flex-shrink: 0;
         }
 
         .control-btn:hover {
@@ -280,10 +292,11 @@
 
         .progress-container {
             flex: 1;
-            height: 30px;
+            min-width: 60px;
+            height: 24px;
             background: #0a0505;
             border: 2px solid var(--copper);
-            border-radius: 15px;
+            border-radius: 12px;
             position: relative;
             overflow: hidden;
             cursor: pointer;
@@ -312,9 +325,9 @@
         .progress-fill-video::after {
             content: '';
             position: absolute;
-            right: -8px; top: 50%;
+            right: -6px; top: 50%;
             transform: translateY(-50%);
-            width: 16px; height: 16px;
+            width: 12px; height: 12px;
             background: radial-gradient(circle at 30% 30%, var(--amber), var(--copper));
             border: 2px solid #1a120a;
             border-radius: 50%;
@@ -323,27 +336,27 @@
 
         .time-display {
             font-family: 'JetBrains Mono', monospace;
-            font-size: 0.9rem;
+            font-size: clamp(0.7rem, 3vw, 0.9rem);
             color: var(--amber);
-            min-width: 100px;
+            min-width: 80px;
             text-align: center;
             text-shadow: 0 0 5px var(--amber);
         }
 
         .volume-slider {
-            width: 80px;
-            height: 8px;
+            width: 60px;
+            height: 6px;
             -webkit-appearance: none;
             appearance: none;
             background: #1a120a;
             border: 1px solid var(--copper);
-            border-radius: 4px;
+            border-radius: 3px;
             outline: none;
         }
 
         .volume-slider::-webkit-slider-thumb {
             -webkit-appearance: none;
-            width: 16px; height: 16px;
+            width: 14px; height: 14px;
             background: radial-gradient(circle at 30% 30%, var(--amber), var(--copper));
             border: 2px solid #1a120a;
             border-radius: 50%;
@@ -352,7 +365,7 @@
         }
 
         .volume-slider::-moz-range-thumb {
-            width: 16px; height: 16px;
+            width: 14px; height: 14px;
             background: radial-gradient(circle at 30% 30%, var(--amber), var(--copper));
             border: 2px solid #1a120a;
             border-radius: 50%;
@@ -360,32 +373,28 @@
             box-shadow: 0 0 5px var(--amber);
         }
 
-        /* Sketches - ОГРОМНЫЕ ЭСКИЗЫ */
         .sketch-section {
             border: 2px solid var(--copper);
-            padding: 2rem;
-            margin-bottom: 2rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
             background: rgba(205, 127, 50, 0.05);
         }
 
         .sketch-title {
             font-family: 'Bebas Neue', sans-serif;
-            font-size: 2.2rem;
+            font-size: clamp(1.3rem, 5vw, 2.2rem);
             color: var(--copper);
-            margin-bottom: 1.5rem;
+            margin-bottom: 1rem;
             text-shadow: 0 0 15px var(--copper);
         }
 
         .sketch-grid {
             display: grid;
-            /* БЫЛО: minmax(200px, 1fr) — СТАЛО: minmax(450px, 1fr) */
-            grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
-            /* БЫЛО: 1.5rem — СТАЛО: 2.5rem */
-            gap: 2.5rem;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1rem;
         }
 
         .sketch-item {
-            /* БЫЛО: 3/4 — можно оставить или поменять на 4/5 для вытянутых */
             aspect-ratio: 3/4;
             background: #0a0a0a;
             border: 3px dashed var(--copper);
@@ -393,13 +402,12 @@
             align-items: center;
             justify-content: center;
             color: var(--copper);
-            font-size: 1.1rem;
+            font-size: 0.9rem;
             text-align: center;
             position: relative;
             overflow: hidden;
             transition: all 0.3s;
-            /* БЫЛО: 280px — СТАЛО: 600px */
-            min-height: 600px;
+            min-height: 350px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.5);
         }
 
@@ -421,16 +429,15 @@
             pointer-events: none;
         }
 
-        /* Progress */
         .progress-section {
             border: 2px solid var(--amber);
-            padding: 2rem;
+            padding: 1.5rem;
             background: rgba(255, 176, 0, 0.05);
         }
 
         .progress-title {
             font-family: 'Bebas Neue', sans-serif;
-            font-size: 2rem;
+            font-size: clamp(1.5rem, 6vw, 2rem);
             color: var(--amber);
             margin-bottom: 1.5rem;
             text-align: center;
@@ -438,18 +445,18 @@
         }
 
         .progress-item {
-            margin-bottom: 1.5rem;
+            margin-bottom: 1.2rem;
         }
 
         .progress-label {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 0.5rem;
-            font-size: 1.1rem;
+            margin-bottom: 0.4rem;
+            font-size: clamp(0.9rem, 3.5vw, 1.1rem);
         }
 
         .progress-bar {
-            height: 24px;
+            height: 20px;
             background: #0a0a0a;
             border: 2px solid var(--amber);
             position: relative;
@@ -480,7 +487,7 @@
 
         .missing {
             color: var(--heat);
-            font-size: 1.3rem;
+            font-size: clamp(1rem, 4vw, 1.3rem);
             text-align: center;
             margin-top: 2rem;
             padding: 1.5rem;
@@ -507,14 +514,59 @@
             padding: 0 5px;
         }
 
-        /* Мобильная версия — тоже увеличил */
-        @media (max-width: 768px) {
-            .asset-grid { grid-template-columns: repeat(2, 1fr); }
-            /* БЫЛО: 150px — СТАЛО: 300px */
-            .sketch-grid { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
-            /* БЫЛО: 200px — СТАЛО: 400px */
-            .sketch-item { min-height: 400px; }
-            .header-title { font-size: 1.5rem; }
+        @media (min-width: 768px) {
+            .bezel {
+                top: 20px; left: 20px; right: 20px; bottom: 20px;
+                border-width: 25px;
+                border-radius: 30px;
+            }
+            .screen {
+                top: 45px; left: 45px; right: 45px; bottom: 45px;
+                padding: 2rem;
+            }
+            .asset-grid {
+                grid-template-columns: repeat(4, 1fr);
+                gap: 1rem;
+            }
+            .sketch-grid {
+                grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+                gap: 1.5rem;
+            }
+            .sketch-item {
+                min-height: 500px;
+            }
+            .asset-item {
+                min-height: 120px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .bezel {
+                border-width: 10px;
+                top: 5px; left: 5px; right: 5px; bottom: 5px;
+                border-radius: 15px;
+            }
+            .screen {
+                top: 15px; left: 15px; right: 15px; bottom: 15px;
+                padding: 0.8rem;
+            }
+            .sketch-grid {
+                grid-template-columns: 1fr;
+            }
+            .sketch-item {
+                min-height: 300px;
+            }
+            .player-controls {
+                gap: 4px;
+                padding: 6px;
+            }
+            .control-btn {
+                width: 32px;
+                height: 32px;
+            }
+            .volume-slider {
+                width: 50px;
+            }
         }
     </style>
 </head>
@@ -526,7 +578,7 @@
         <div class="header">
             <a href="index.html" class="back-btn">← НАЗАД</a>
             <div class="header-title">АРХИВ МЕДИА</div>
-            <span style="color:var(--amber-dim);">FILE: ASSETS.DAT</span>
+            <span style="color:var(--amber-dim);font-size:clamp(0.7rem, 2.5vw, 0.9rem);">FILE: ASSETS.DAT</span>
         </div>
 
         <div class="asset-section">
@@ -545,7 +597,7 @@
             
             <div class="steampunk-player">
                 <div class="video-container">
-                    <video id="video1" src="video/mortimer-facemorph.mp4" preload="metadata"></video>
+                    <video id="video1" src="video/mortimer-facemorph.mp4" preload="metadata" playsinline></video>
                 </div>
                 <div class="player-controls">
                     <button class="control-btn play-btn" onclick="togglePlay('video1')">▶</button>
@@ -576,7 +628,7 @@
             
             <div class="steampunk-player">
                 <div class="video-container">
-                    <video id="video2" src="video/captain-facemorph.mp4" preload="metadata" muted></video>
+                    <video id="video2" src="video/captain-facemorph.mp4" preload="metadata" muted playsinline></video>
                 </div>
                 <div class="player-controls">
                     <button class="control-btn play-btn" onclick="togglePlay('video2')">▶</button>
