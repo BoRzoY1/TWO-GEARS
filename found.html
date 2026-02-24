@@ -1,0 +1,466 @@
+<!-- found.html - Видеозапись с приставкой -->
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>БРАТЬЯ & КО - Найденное</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=JetBrains+Mono:wght@400;700&family=VT323&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --amber: #FFB000;
+            --amber-dim: #8B6914;
+            --green: #33ff00;
+            --copper: #CD7F32;
+            --dark: #0a0a0a;
+        }
+
+        body {
+            background: var(--dark);
+            color: var(--amber);
+            font-family: 'VT323', monospace;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .scanlines {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(to bottom, rgba(255,255,255,0) 50%, rgba(0,0,0,0.3) 50%);
+            background-size: 100% 4px;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        .bezel {
+            position: fixed;
+            top: 20px; left: 20px; right: 20px; bottom: 20px;
+            border: 30px solid #2a2a2a;
+            border-radius: 20px;
+            box-shadow: inset 0 0 100px rgba(0,0,0,0.8), 0 0 0 10px #1a1a1a, 0 0 0 15px var(--copper);
+            pointer-events: none;
+            z-index: 200;
+        }
+
+        .screen {
+            position: absolute;
+            top: 40px; left: 40px; right: 40px; bottom: 40px;
+            padding: 3rem;
+            overflow-y: auto;
+            z-index: 10;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--amber);
+            padding-bottom: 1rem;
+            margin-bottom: 3rem;
+        }
+
+        .back-btn {
+            color: var(--amber);
+            text-decoration: none;
+            border: 1px solid var(--amber);
+            padding: 0.5rem 1rem;
+            transition: all 0.3s;
+        }
+
+        .back-btn:hover {
+            background: var(--amber);
+            color: #000;
+        }
+
+        .title {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 2rem;
+            letter-spacing: 0.2em;
+        }
+
+        /* Video player interface */
+        .video-container {
+            background: #000;
+            border: 3px solid var(--amber-dim);
+            padding: 2rem;
+            margin-bottom: 3rem;
+            position: relative;
+        }
+
+        .video-screen {
+            aspect-ratio: 4/3;
+            background: linear-gradient(135deg, #1a1a1a, #0a0a0a);
+            border: 2px solid #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Static noise animation */
+        .static {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+            opacity: 0.1;
+            animation: staticNoise 0.2s steps(10) infinite;
+        }
+
+        @keyframes staticNoise {
+            0%, 100% { transform: translate(0,0); }
+            10% { transform: translate(-5%,-5%); }
+            20% { transform: translate(5%,5%); }
+            30% { transform: translate(-5%,5%); }
+            40% { transform: translate(5%,-5%); }
+        }
+
+        .play-button {
+            width: 100px;
+            height: 100px;
+            border: 4px solid var(--amber);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            z-index: 10;
+            background: rgba(0,0,0,0.7);
+        }
+
+        .play-button:hover {
+            background: var(--amber);
+            transform: scale(1.1);
+            box-shadow: 0 0 30px var(--amber);
+        }
+
+        .play-button::after {
+            content: '▶';
+            font-size: 2rem;
+            color: var(--amber);
+            margin-left: 5px;
+        }
+
+        .play-button:hover::after {
+            color: #000;
+        }
+
+        .video-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--amber-dim);
+        }
+
+        .progress-bar {
+            flex: 1;
+            height: 10px;
+            background: #1a1a1a;
+            border: 1px solid var(--amber-dim);
+            margin: 0 1rem;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .progress-fill {
+            height: 100%;
+            width: 0%;
+            background: var(--amber);
+            box-shadow: 0 0 10px var(--amber);
+        }
+
+        .time {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+        }
+
+        /* File info */
+        .file-info {
+            background: rgba(255, 176, 0, 0.05);
+            border: 1px solid var(--amber-dim);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .file-header {
+            display: grid;
+            grid-template-columns: 150px 1fr;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .file-label {
+            color: var(--amber-dim);
+        }
+
+        .file-value {
+            color: var(--amber);
+        }
+
+        .file-value.important {
+            color: var(--green);
+            text-shadow: 0 0 5px var(--green);
+        }
+
+        /* Transcript */
+        .transcript {
+            background: #0a0a0a;
+            border: 1px solid var(--amber-dim);
+            padding: 2rem;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .transcript-title {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--copper);
+        }
+
+        .dialogue {
+            margin-bottom: 1rem;
+            line-height: 1.6;
+        }
+
+        .speaker {
+            color: var(--copper);
+            font-weight: bold;
+        }
+
+        .speaker.vitya { color: #ff6666; }
+        .speaker.kostya { color: #66ff66; }
+
+        /* Warning */
+        .warning-box {
+            border: 2px solid #ff3333;
+            background: rgba(255, 51, 51, 0.1);
+            padding: 1.5rem;
+            margin-top: 2rem;
+            text-align: center;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { border-color: #ff3333; }
+            50% { border-color: #ff6666; }
+        }
+
+        .warning-text {
+            color: #ff6663;
+            font-size: 1.3rem;
+            font-weight: bold;
+        }
+
+        /* Hidden message */
+        .hidden-msg {
+            display: none;
+            margin-top: 2rem;
+            padding: 2rem;
+            background: rgba(51, 255, 0, 0.05);
+            border: 2px solid var(--green);
+            text-align: center;
+        }
+
+        .hidden-msg.show {
+            display: block;
+            animation: glitchIn 0.5s;
+        }
+
+        @keyframes glitchIn {
+            0% { transform: translate(10px, 0); filter: hue-rotate(90deg); }
+            20% { transform: translate(-10px, 0); }
+            40% { transform: translate(10px, 0); }
+            60% { transform: translate(-10px, 0); }
+            100% { transform: translate(0, 0); }
+        }
+
+        @media (max-width: 768px) {
+            .file-header { grid-template-columns: 1fr; }
+            .screen { padding: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="scanlines"></div>
+    <div class="bezel"></div>
+    
+    <div class="screen">
+        <div class="header">
+            <a href="index.html" class="back-btn">← НАЗАД</a>
+            <div class="title">АРХИВ ВИДЕОЗАПИСЕЙ</div>
+            <div style="color:var(--amber-dim);">FILE: CAM_04.DAT</div>
+        </div>
+
+        <div class="file-info">
+            <div class="file-header">
+                <span class="file-label">ДАТА ЗАПИСИ:</span>
+                <span class="file-value">14.03.2024</span>
+            </div>
+            <div class="file-header">
+                <span class="file-label">ИСТОЧНИК:</span>
+                <span class="file-value">Камера наблюдения магазина</span>
+            </div>
+            <div class="file-header">
+                <span class="file-label">СТАТУС:</span>
+                <span class="file-value important">⚠ НЕОБЫЧНАЯ АКТИВНОСТЬ</span>
+            </div>
+            <div class="file-header">
+                <span class="file-label">ПРИМЕЧАНИЕ:</span>
+                <span class="file-value">После этой записи братья пропали. Полиция не нашла следов.</span>
+            </div>
+        </div>
+
+        <div class="video-container">
+            <div class="video-screen" id="videoScreen">
+                <div class="static"></div>
+                <div class="play-button" onclick="playVideo()" id="playBtn"></div>
+                
+                <!-- Video content simulation -->
+                <div id="videoContent" style="display:none;position:absolute;top:0;left:0;right:0;bottom:0;padding:2rem;overflow:hidden;">
+                    <div style="height:100%;display:flex;flex-direction:column;justify-content:space-between;color:#fff;">
+                        <div style="text-align:center;font-family:'Bebas Neue',sans-serif;font-size:2rem;color:var(--amber);text-shadow:0 0 10px var(--amber);">
+                            ИГРОВАЯ ЗАПИСЬ
+                        </div>
+                        <div style="background:rgba(0,0,0,0.8);padding:1rem;border:1px solid var(--amber);">
+                            <p style="margin-bottom:0.5rem;"><span style="color:var(--amber);">ВИТЯ:</span> Смотри, она искрит!</p>
+                            <p style="margin-bottom:0.5rem;"><span style="color:var(--green);">КОСТЯ:</span> Отключи! Что-то не так!</p>
+                            <p style="color:#ff6666;font-weight:bold;">⚠ АНОМАЛЬНАЯ АКТИВНОСТЬ ⚠</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="video-controls">
+                <span class="time">00:00</span>
+                <div class="progress-bar" onclick="seekVideo(event)">
+                    <div class="progress-fill" id="progress"></div>
+                </div>
+                <span class="time" id="duration">04:23</span>
+            </div>
+        </div>
+
+        <div class="transcript">
+            <div class="transcript-title">РАСШИФРОВКА ЗАПИСИ</div>
+            
+            <div class="dialogue">
+                <span class="speaker vitya">ВИТЯ:</span> 
+                Костя! Иди сюда быстрее! Смотри что я купил!
+            </div>
+            
+            <div class="dialogue">
+                <span class="speaker kostya">КОСТЯ:</span> 
+                Опять хлам? Вить, у нас склад завален твоими "сокровищами"...
+            </div>
+            
+            <div class="dialogue">
+                <span class="speaker vitya">ВИТЯ:</span> 
+                Нет, слушай! Чувак продал за копейки. Сказал "избавьте меня от этого проклятья".
+            </div>
+            
+            <div class="dialogue">
+                <span class="speaker kostya">КОСТЯ:</span> 
+                Проклятья? Вить, это просто старая приставка. Хотя... разъем странный. 
+                Сходи в подвал, принеси тот телек с трубкой.
+            </div>
+            
+            <div class="dialogue">
+                <span class="speaker vitya">ВИТЯ:</span> 
+                Давай хоть разок сыграем? Для проверки?
+            </div>
+            
+            <div class="dialogue">
+                <span class="speaker kostya">КОСТЯ:</span> 
+            *вздох* Ладно. Но быстро! Мне еще заказ чинить...
+            </div>
+            
+            <div class="dialogue" style="color:var(--amber-dim);font-style:italic;">
+                [Звук включения приставки. Сильное искрение. Шум.]
+            </div>
+            
+            <div class="dialogue">
+                <span class="speaker kostya">КОСТЯ:</span> 
+                Что за... Вить, она не должна так работать!
+            </div>
+            
+            <div class="dialogue">
+                <span class="speaker vitya">ВИТЯ:</span> 
+                Смотри! На экране что-то появляется! Это же...
+            </div>
+            
+            <div class="dialogue" style="color:#ff3333;font-weight:bold;">
+                [АНОМАЛЬНАЯ ЭНЕРГИЯ. ВИХРЬ. ПРОПАЖА.]
+            </div>
+        </div>
+
+        <div class="warning-box">
+            <div class="warning-text">
+                ⚠ ПОСЛЕ ЭТОГО МОМЕНТА БРАТЬЯ ИСЧЕЗЛИ ⚠<br>
+                КАМЕРА ЗАПИСАЛА ТОЛЬКО СТАТИЧЕСКИЙ ШУМ
+            </div>
+        </div>
+
+        <div class="hidden-msg" id="hiddenMsg">
+            <h3 style="color:var(--green);margin-bottom:1rem;">⚠ ВНИМАНИЕ ⚠</h3>
+            <p style="font-size:1.3rem;margin-bottom:1rem;">
+                Если вы видите это сообщение, значит приставка снова активна.
+            </p>
+            <p style="margin-bottom:1rem;">
+                Мы застряли внутри. Это не игра. Это реальный мир.<br>
+                Мы нашли способ выйти, но нужна помощь снаружи.
+            </p>
+            <p style="color:var(--copper);font-weight:bold;">
+                Если вы разбираетесь в играх — присоединяйтесь к проекту.<br>
+                Помогите нам закончить эту историю.
+            </p>
+            <a href="join.html" style="display:inline-block;margin-top:1rem;padding:1rem 2rem;background:var(--green);color:#000;text-decoration:none;font-weight:bold;">
+                УЗНАТЬ БОЛЬШЕ →
+            </a>
+        </div>
+    </div>
+
+    <script>
+        let isPlaying = false;
+        let progress = 0;
+        let interval;
+
+        function playVideo() {
+            if (isPlaying) return;
+            
+            isPlaying = true;
+            document.getElementById('playBtn').style.display = 'none';
+            document.getElementById('videoContent').style.display = 'block';
+            
+            // Simulate video progress
+            interval = setInterval(() => {
+                progress += 0.5;
+                document.getElementById('progress').style.width = progress + '%';
+                
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    document.getElementById('hiddenMsg').classList.add('show');
+                    document.getElementById('videoContent').innerHTML = `
+                        <div style="height:100%;display:flex;align-items:center;justify-content:center;color:#ff3333;font-size:3rem;font-family:'Bebas Neue',sans-serif;text-shadow:0 0 20px #ff3333;">
+                            СИГНАЛ ПРЕРВАН
+                        </div>
+                    `;
+                }
+            }, 100);
+        }
+
+        function seekVideo(e) {
+            const bar = e.currentTarget;
+            const clickX = e.offsetX;
+            const width = bar.offsetWidth;
+            progress = (clickX / width) * 100;
+            document.getElementById('progress').style.width = progress + '%';
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,352 @@
+<!-- story.html - История -->
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <link rel="icon" type="image/png" href="favicon.png">
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Story - TWO GEARS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=JetBrains+Mono:wght@400;700&family=VT323&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --amber: #FFB000;
+            --amber-dim: #8B6914;
+            --heat: #FF4500;
+            --copper: #CD7F32;
+            --green: #33ff00;
+            --dark: #050505;
+        }
+
+        body {
+            background: var(--dark);
+            color: var(--amber);
+            font-family: 'VT323', monospace;
+            min-height: 100vh;
+        }
+
+        .scanlines {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(to bottom, rgba(255,255,255,0) 50%, rgba(0,0,0,0.4) 50%);
+            background-size: 100% 4px;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        .bezel {
+            position: fixed;
+            top: 20px; left: 20px; right: 20px; bottom: 20px;
+            border: 25px solid #1a1a1a;
+            border-radius: 30px;
+            box-shadow: 
+                inset 0 0 150px rgba(0,0,0,0.9),
+                0 0 0 15px #0a0a0a,
+                0 0 0 20px var(--copper),
+                0 0 60px rgba(205, 127, 50, 0.4);
+            pointer-events: none;
+            z-index: 200;
+        }
+
+        .screen {
+            position: absolute;
+            top: 45px; left: 45px; right: 45px; bottom: 45px;
+            padding: 2rem;
+            overflow-y: auto;
+            z-index: 10;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--amber);
+            padding-bottom: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .back-btn {
+            color: var(--amber);
+            text-decoration: none;
+            border: 1px solid var(--amber);
+            padding: 0.5rem 1rem;
+            transition: all 0.3s;
+        }
+
+        .back-btn:hover {
+            background: var(--amber);
+            color: #000;
+        }
+
+        .header-title {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 2rem;
+            letter-spacing: 0.2em;
+        }
+
+        /* Story blocks */
+        .chapter {
+            border: 2px solid var(--amber-dim);
+            margin-bottom: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .chapter::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; height: 2px;
+            background: linear-gradient(90deg, transparent, var(--amber), transparent);
+            animation: scan 3s linear infinite;
+        }
+
+        @keyframes scan {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .chapter-header {
+            background: rgba(255, 176, 0, 0.1);
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--amber-dim);
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chapter-header:hover {
+            background: rgba(255, 176, 0, 0.2);
+        }
+
+        .chapter-num {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.5rem;
+            color: var(--copper);
+        }
+
+        .chapter-title {
+            font-size: 1.3rem;
+            flex: 1;
+            margin-left: 1rem;
+        }
+
+        .chapter-toggle {
+            font-size: 1.5rem;
+            transition: transform 0.3s;
+        }
+
+        .chapter.active .chapter-toggle {
+            transform: rotate(45deg);
+        }
+
+        .chapter-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s;
+        }
+
+        .chapter.active .chapter-content {
+            max-height: 2000px;
+        }
+
+        .chapter-body {
+            padding: 1.5rem;
+        }
+
+        .chapter-body p {
+            font-size: 1.2rem;
+            line-height: 1.8;
+            margin-bottom: 1rem;
+        }
+
+        .highlight { color: var(--amber); font-weight: bold; text-shadow: 0 0 5px var(--amber); }
+        .danger { color: var(--heat); font-weight: bold; }
+        .success { color: var(--green); font-weight: bold; }
+
+        /* Characters */
+        .char-intro {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .char-card {
+            border: 2px solid var(--copper);
+            padding: 1.5rem;
+            text-align: center;
+            background: rgba(205, 127, 50, 0.05);
+        }
+
+        .char-name {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.8rem;
+            color: var(--copper);
+            margin-bottom: 0.5rem;
+        }
+
+        .char-role {
+            font-size: 1rem;
+            color: var(--amber-dim);
+            margin-bottom: 1rem;
+        }
+
+        .char-desc {
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+
+        /* Quote */
+        .quote-box {
+            border-left: 4px solid var(--heat);
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            background: rgba(255, 69, 0, 0.05);
+            font-style: italic;
+            font-size: 1.3rem;
+        }
+
+        @media (max-width: 768px) {
+            .char-intro { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="scanlines"></div>
+    <div class="bezel"></div>
+    
+    <div class="screen">
+        <div class="header">
+            <a href="index.html" class="back-btn">← НАЗАД</a>
+            <div class="header-title">АРХИВ СЮЖЕТА</div>
+            <span style="color:var(--amber-dim);">FILE: NARRATIVE.DAT</span>
+        </div>
+
+        <div class="chapter active">
+            <div class="chapter-header" onclick="this.parentElement.classList.toggle('active')">
+                <span class="chapter-num">ПРОЛОГ</span>
+                <span class="chapter-title">ПРИСТАВКА</span>
+                <span class="chapter-toggle">+</span>
+            </div>
+            <div class="chapter-content">
+                <div class="chapter-body">
+                    <p>
+                        <span class="highlight">Виктор и Константин</span> — братья. Владельцы комиссионного магазина 
+                        в захудалом районе. Виктор (24) — болтливый оптимист, стоит на кассе, 
+                        умеет убедить кого угодно в чём угодно. Константин (28) — молчаливый механик, 
+                        чинит то, что другие выбрасывают.
+                    </p>
+                    
+                    <div class="quote-box">
+                        "Продавец торопился избавиться от приставки. Сказал: 'Заберите эту проклятую вещь'. 
+                        Витя купил за копейки. Мы не знали, что некоторые механизмы чинить нельзя..."
+                    </div>
+
+                    <p>
+                        Приставка включается с трудом. Искрит. Пыхтит. Но работает. 
+                        Они выбирают персонажей — и экран <span class="danger">засасывает их внутрь</span>. 
+                        Через вихрь шестерёнок и проводов они падают в механический мир.
+                    </p>
+
+                    <div class="char-intro">
+                        <div class="char-card">
+                            <div class="char-name">ВИКТОР</div>
+                            <div class="char-role">Игрок 1 • Младший брат</div>
+                            
+                        </div>
+                        <div class="char-card">
+                            <div class="char-name">КОНСТАНТИН</div>
+                            <div class="char-role">Игрок 2 • Старший брат</div>
+                            
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="chapter">
+            <div class="chapter-header" onclick="this.parentElement.classList.toggle('active')">
+                <span class="chapter-num">ГЛАВА 1</span>
+                <span class="chapter-title">ПРОБУЖДЕНИЕ</span>
+                <span class="chapter-toggle">+</span>
+            </div>
+            <div class="chapter-content">
+                <div class="chapter-body">
+                    <p>
+                        Они просыпаются в <span class="highlight">замершем механическом городе</span>. 
+                        Все роботы остановились, кроме тех, что сошли с ума. 
+                        Чтобы выжить, братья должны работать вместе.
+                    </p>
+                    <p>
+                        <span class="success">Кооп-механика:</span> один лезет в вентиляцию, 
+                        другой держит дверь. Один отвлекает пауков-роботов, 
+                        другой активирует рычаги. Без друга — смерть.
+                    </p>
+                    <p>
+                        У ворот города — <span class="danger">Ключник</span>: двухголовый четырёхрукий страж 
+                        (молот, крюк, пила, револьвер с ключами). Хромает — используй это. 
+                        Убить или обмануть? Выбор игроков влияет на концовку.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="chapter">
+            <div class="chapter-header" onclick="this.parentElement.classList.toggle('active')">
+                <span class="chapter-num">ГЛАВА 2-3</span>
+                <span class="chapter-title">ПУТЬ К СЕРДЦУ</span>
+                <span class="chapter-toggle">+</span>
+            </div>
+            <div class="chapter-content">
+                <div class="chapter-body">
+                    <p>
+                        Через Темный Лес, город у берега, <span class="highlight">гонки на стимпанк-машинах</span> 
+                        (совместное управление: один рулит, другой чинит/ускоряет).
+                    </p>
+                    <p>
+                        Путешествие на дерибжабле с загадочным <span class="highlight">Капитаном</span> — 
+                        он тоже из реального мира, застрявший здесь 50 лет. 
+                        Он рассказывает, что <span class="danger">Профессор Мортимер</span> — не тот, за кого себя выдаёт.
+                    </p>
+                    <div class="quote-box">
+                        "Мортимер обещал отправить меня домой. 50 лет я жду. 
+                        Не доверяй ему, парни. Но без него вы не выберетесь..."
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="chapter">
+            <div class="chapter-header" onclick="this.parentElement.classList.toggle('active')">
+                <span class="chapter-num">ГЛАВА 4</span>
+                <span class="chapter-title">ВЫБОР</span>
+                <span class="chapter-toggle">+</span>
+            </div>
+            <div class="chapter-content">
+                <div class="chapter-body">
+                    <p>
+                        В подводной лаборатории — <span class="highlight">Сердце мира</span>, 
+                        механизм, питающий всё. Но тут появляется "Доктор Ангус", который кричит: 
+                        Мортимер обманывает, он хочет использовать Сердце для своих целей.
+                    </p>
+                    <p style="font-size: 1.4rem; color: var(--heat); text-align: center; margin: 2rem 0;">
+                        КОМУ ВЕРИТЬ?
+                    </p>
+                    <p>
+                        <span class="success">Если верят Доктору Ангус </span> — они спасают город, 
+                        но понимают, что портал домой работал всегда. Они могли вернутся домой еще в начале.
+                    </p>
+                    <p>
+                        <span class="danger">Если верят Профессору Мортимера </span> — они отдаюи ему Сердце, 
+                        он предаёт их, они возвращаются домой, но обрекают город на смерть. 
+                        Живут с этой мыслью.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <link rel="icon" type="image/png" href="favicon.png">
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>World - TWO GEARS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=JetBrains+Mono:wght@400;700&family=VT323&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --amber: #FFB000;
+            --amber-dim: #8B6914;
+            --heat: #FF4500;
+            --copper: #CD7F32;
+            --green: #33ff00;
+            --dark: #050505;
+        }
+
+        body {
+            background: var(--dark);
+            color: var(--amber);
+            font-family: 'VT323', monospace;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .scanlines {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(to bottom, rgba(255,255,255,0) 50%, rgba(0,0,0,0.4) 50%);
+            background-size: 100% 4px;
+            pointer-events: none;
+            z-index: 100;
+            animation: scanlineMove 10s linear infinite;
+        }
+
+        @keyframes scanlineMove {
+            0% { background-position: 0 0; }
+            100% { background-position: 0 100px; }
+        }
+
+        .bezel {
+            position: fixed;
+            top: 20px; left: 20px; right: 20px; bottom: 20px;
+            border: 25px solid #1a1a1a;
+            border-radius: 30px;
+            box-shadow: 
+                inset 0 0 150px rgba(0,0,0,0.9),
+                0 0 0 15px #0a0a0a,
+                0 0 0 20px var(--copper),
+                0 0 60px rgba(205, 127, 50, 0.4);
+            pointer-events: none;
+            z-index: 200;
+        }
+
+        .screen {
+            position: absolute;
+            top: 45px; left: 45px; right: 45px; bottom: 45px;
+            padding: 2rem;
+            overflow-y: auto;
+            z-index: 10;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--amber);
+            padding-bottom: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .back-btn {
+            color: var(--amber);
+            text-decoration: none;
+            border: 1px solid var(--amber);
+            padding: 0.5rem 1rem;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .back-btn::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 100%; height: 100%;
+            background: var(--amber);
+            transition: left 0.3s;
+            z-index: -1;
+        }
+
+        .back-btn:hover::before {
+            left: 0;
+        }
+
+        .back-btn:hover {
+            color: #000;
+        }
+
+        .header-title {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 2rem;
+            letter-spacing: 0.2em;
+            text-shadow: 0 0 10px var(--amber);
+        }
+
+        /* Ready assets */
+        .asset-section {
+            border: 3px solid var(--green);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            background: rgba(51, 255, 0, 0.05);
+            position: relative;
+            box-shadow: 0 0 20px rgba(51, 255, 0, 0.1);
+        }
+
+        .asset-section::before {
+            content: '✓ READY';
+            position: absolute;
+            top: -12px; left: 20px;
+            background: var(--dark);
+            padding: 0 10px;
+            color: var(--green);
+            font-size: 0.9rem;
+            border: 1px solid var(--green);
+        }
+
+        .asset-title {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 2rem;
+            color: var(--green);
+            margin-bottom: 1rem;
+            text-shadow: 0 0 10px var(--green);
+        }
+
+        .asset-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .asset-item {
+            aspect-ratio: 1;
+            background: #0a0a0a;
+            border: 2px solid var(--green);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--green);
+            font-size: 0.85rem;
+            text-align: center;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s;
+            overflow: hidden;
+        }
+
+        .asset-item:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px var(--green);
+            z-index: 10;
+        }
+
+        .asset-item::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(45deg, transparent 30%, rgba(51,255,0,0.1) 50%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .asset-item:hover::after {
+            opacity: 1;
+        }
+
+        /* Steampunk Video Player */
+        .steampunk-player {
+            width: 100%;
+            margin-top: 1rem;
+            background: linear-gradient(135deg, #1a0f0a 0%, #0d0505 100%);
+            border: 3px solid var(--copper);
+            border-radius: 8px;
+            padding: 8px;
+            position: relative;
+            box-shadow: 
+                inset 0 0 20px rgba(0,0,0,0.8),
+                0 0 20px rgba(205, 127, 50, 0.3);
+        }
+
+        .steampunk-player::before {
+            content: '';
+            position: absolute;
+            top: -3px; left: -3px; right: -3px; bottom: -3px;
+            background: linear-gradient(45deg, var(--copper), var(--amber), var(--copper));
+            border-radius: 10px;
+            z-index: -1;
+            opacity: 0.5;
+        }
+
+        .video-container {
+            position: relative;
+            width: 100%;
+            background: #000;
+            border: 2px solid #3a2818;
+            overflow: hidden;
+        }
+
+        .video-container video {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .player-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            background: linear-gradient(to bottom, #2a1f15, #1a120a);
+            border-top: 2px solid var(--copper);
+            margin-top: 4px;
+        }
+
+        .control-btn {
+            width: 40px;
+            height: 40px;
+            background: radial-gradient(circle at 30% 30%, #4a3728, #1a120a);
+            border: 2px solid var(--copper);
+            border-radius: 50%;
+            color: var(--amber);
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            box-shadow: 
+                inset 0 2px 4px rgba(255,255,255,0.1),
+                0 4px 8px rgba(0,0,0,0.5);
+            position: relative;
+        }
+
+        .control-btn:hover {
+            background: radial-gradient(circle at 30% 30%, #5a4738, #2a221a);
+            box-shadow: 
+                0 0 15px var(--amber),
+                inset 0 2px 4px rgba(255,255,255,0.2);
+            transform: translateY(-2px);
+        }
+
+        .control-btn:active {
+            transform: translateY(0);
+            box-shadow: inset 0 2px 8px rgba(0,0,0,0.8);
+        }
+
+        .control-btn.mute-btn {
+            position: relative;
+        }
+
+        .control-btn.mute-btn::after {
+            content: '';
+            position: absolute;
+            top: 50%; left: 50%;
+            width: 2px; height: 60%;
+            background: var(--heat);
+            transform: translate(-50%, -50%) rotate(45deg);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .control-btn.mute-btn.muted::after {
+            opacity: 1;
+        }
+
+        .progress-container {
+            flex: 1;
+            height: 30px;
+            background: #0a0505;
+            border: 2px solid var(--copper);
+            border-radius: 15px;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .progress-track {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: repeating-linear-gradient(
+                90deg,
+                transparent,
+                transparent 10px,
+                rgba(205, 127, 50, 0.1) 10px,
+                rgba(205, 127, 50, 0.1) 12px
+            );
+        }
+
+        .progress-fill-video {
+            height: 100%;
+            background: linear-gradient(90deg, var(--copper), var(--amber), var(--copper));
+            width: 0%;
+            position: relative;
+            box-shadow: 0 0 10px var(--amber);
+        }
+
+        .progress-fill-video::after {
+            content: '';
+            position: absolute;
+            right: -8px; top: 50%;
+            transform: translateY(-50%);
+            width: 16px; height: 16px;
+            background: radial-gradient(circle at 30% 30%, var(--amber), var(--copper));
+            border: 2px solid #1a120a;
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--amber);
+        }
+
+        .time-display {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            color: var(--amber);
+            min-width: 100px;
+            text-align: center;
+            text-shadow: 0 0 5px var(--amber);
+        }
+
+        .volume-slider {
+            width: 80px;
+            height: 8px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: #1a120a;
+            border: 1px solid var(--copper);
+            border-radius: 4px;
+            outline: none;
+        }
+
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px; height: 16px;
+            background: radial-gradient(circle at 30% 30%, var(--amber), var(--copper));
+            border: 2px solid #1a120a;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 5px var(--amber);
+        }
+
+        .volume-slider::-moz-range-thumb {
+            width: 16px; height: 16px;
+            background: radial-gradient(circle at 30% 30%, var(--amber), var(--copper));
+            border: 2px solid #1a120a;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 5px var(--amber);
+        }
+
+        /* Sketches - ОГРОМНЫЕ ЭСКИЗЫ */
+        .sketch-section {
+            border: 2px solid var(--copper);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            background: rgba(205, 127, 50, 0.05);
+        }
+
+        .sketch-title {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 2.2rem;
+            color: var(--copper);
+            margin-bottom: 1.5rem;
+            text-shadow: 0 0 15px var(--copper);
+        }
+
+        .sketch-grid {
+            display: grid;
+            /* БЫЛО: minmax(200px, 1fr) — СТАЛО: minmax(450px, 1fr) */
+            grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
+            /* БЫЛО: 1.5rem — СТАЛО: 2.5rem */
+            gap: 2.5rem;
+        }
+
+        .sketch-item {
+            /* БЫЛО: 3/4 — можно оставить или поменять на 4/5 для вытянутых */
+            aspect-ratio: 3/4;
+            background: #0a0a0a;
+            border: 3px dashed var(--copper);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--copper);
+            font-size: 1.1rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s;
+            /* БЫЛО: 280px — СТАЛО: 600px */
+            min-height: 600px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+
+        .sketch-item:hover {
+            border-style: solid;
+            border-width: 4px;
+            transform: scale(1.02) translateY(-5px);
+            box-shadow: 
+                0 0 30px rgba(205, 127, 50, 0.6),
+                0 10px 30px rgba(0,0,0,0.8);
+            z-index: 10;
+        }
+
+        .sketch-item::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(135deg, rgba(205,127,50,0.15) 0%, transparent 50%);
+            pointer-events: none;
+        }
+
+        /* Progress */
+        .progress-section {
+            border: 2px solid var(--amber);
+            padding: 2rem;
+            background: rgba(255, 176, 0, 0.05);
+        }
+
+        .progress-title {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 2rem;
+            color: var(--amber);
+            margin-bottom: 1.5rem;
+            text-align: center;
+            text-shadow: 0 0 15px var(--amber);
+        }
+
+        .progress-item {
+            margin-bottom: 1.5rem;
+        }
+
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        .progress-bar {
+            height: 24px;
+            background: #0a0a0a;
+            border: 2px solid var(--amber);
+            position: relative;
+            overflow: hidden;
+            border-radius: 4px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--amber-dim), var(--amber));
+            box-shadow: 0 0 15px var(--amber);
+            transition: width 1s ease-out;
+            position: relative;
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: repeating-linear-gradient(
+                90deg,
+                transparent,
+                transparent 10px,
+                rgba(0,0,0,0.2) 10px,
+                rgba(0,0,0,0.2) 12px
+            );
+        }
+
+        .missing {
+            color: var(--heat);
+            font-size: 1.3rem;
+            text-align: center;
+            margin-top: 2rem;
+            padding: 1.5rem;
+            border: 2px dashed var(--heat);
+            background: rgba(255, 69, 0, 0.05);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 5px var(--heat); }
+            50% { box-shadow: 0 0 20px var(--heat); }
+        }
+
+        .missing a {
+            color: var(--green);
+            text-decoration: none;
+            border-bottom: 2px solid var(--green);
+            transition: all 0.3s;
+        }
+
+        .missing a:hover {
+            background: var(--green);
+            color: #000;
+            padding: 0 5px;
+        }
+
+        /* Мобильная версия — тоже увеличил */
+        @media (max-width: 768px) {
+            .asset-grid { grid-template-columns: repeat(2, 1fr); }
+            /* БЫЛО: 150px — СТАЛО: 300px */
+            .sketch-grid { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
+            /* БЫЛО: 200px — СТАЛО: 400px */
+            .sketch-item { min-height: 400px; }
+            .header-title { font-size: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="scanlines"></div>
+    <div class="bezel"></div>
+    
+    <div class="screen">
+        <div class="header">
+            <a href="index.html" class="back-btn">← НАЗАД</a>
+            <div class="header-title">АРХИВ МЕДИА</div>
+            <span style="color:var(--amber-dim);">FILE: ASSETS.DAT</span>
+        </div>
+
+        <div class="asset-section">
+            <div class="asset-title">ПРОФЕССОР МОРТИМЕР</div>
+            <p>Готовая 3D модель с мимикой</p>
+            <div class="asset-grid">
+                <div class="asset-item" style="background:url('images/mortimer/mortimer-front.jpg')center/cover;"></div> 
+                <div class="asset-item" style="background:url('images/mortimer/mortimer-back.jpg')center/cover;"></div>
+                <div class="asset-item" style="background:url('images/mortimer/mortimer-left.jpg')center/cover;"></div>
+                <div class="asset-item" style="background:url('images/mortimer/mortimer-right.jpg')center/cover;"></div>
+                <div class="asset-item" style="background:url('images/mortimer/mortimer-wire-front.jpg')center/cover;"></div>
+                <div class="asset-item" style="background:url('images/mortimer/mortimer-wire-back.jpg')center/cover;"></div>
+                <div class="asset-item" style="background:url('images/mortimer/mortimer-wire-left.jpg')center/cover;"></div>
+                <div class="asset-item" style="background:url('images/mortimer/mortimer-wire-right.jpg')center/cover;"></div>
+            </div>
+            
+            <div class="steampunk-player">
+                <div class="video-container">
+                    <video id="video1" src="video/mortimer-facemorph.mp4" preload="metadata"></video>
+                </div>
+                <div class="player-controls">
+                    <button class="control-btn play-btn" onclick="togglePlay('video1')">▶</button>
+                    <button class="control-btn mute-btn muted" onclick="toggleMute('video1')" id="mute1">🔊</button>
+                    <input type="range" class="volume-slider" min="0" max="100" value="0" onchange="setVolume('video1', this.value)" id="vol1">
+                    <div class="progress-container" onclick="seekVideo(event, 'video1')">
+                        <div class="progress-track"></div>
+                        <div class="progress-fill-video" id="progress1"></div>
+                    </div>
+                    <div class="time-display" id="time1">00:00 / 00:00</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="asset-section">
+            <div class="asset-title">КАПИТАН ДЕРИЖАБЛЯ</div>
+            <p>Готовая 3D модель с мимикой</p>
+            <div class="asset-grid">
+                <div class="asset-item" style="background:url('images/captain/captain-front.jpg')center/cover;"></div>
+                <div class="asset-item" style="background:url('images/captain/captain-back.jpg')center/cover;"></div>
+                <div class="asset-item" style="background:url('images/captain/captain-left.jpg')center/cover;"></div>
+                <div class="asset-item" style="background:url('images/captain/captain-right.jpg')center/cover;"></div>
+                <div class="asset-item" style="background:url('images/captain/captain-wire-front.jpg')center/cover;"></div>
+                <div class="asset-item" style="background:url('images/captain/captain-wire-back.jpg')center/cover;"></div>
+                <div class="asset-item" style="background:url('images/captain/captain-wire-left.jpg')center/cover;"></div>
+                <div class="asset-item" style="background:url('images/captain/captain-wire-right.jpg')center/cover;"></div>
+            </div>
+            
+            <div class="steampunk-player">
+                <div class="video-container">
+                    <video id="video2" src="video/captain-facemorph.mp4" preload="metadata" muted></video>
+                </div>
+                <div class="player-controls">
+                    <button class="control-btn play-btn" onclick="togglePlay('video2')">▶</button>
+                    <button class="control-btn mute-btn muted" onclick="toggleMute('video2')" id="mute2">🔊</button>
+                    <input type="range" class="volume-slider" min="0" max="100" value="0" onchange="setVolume('video2', this.value)" id="vol2">
+                    <div class="progress-container" onclick="seekVideo(event, 'video2')">
+                        <div class="progress-track"></div>
+                        <div class="progress-fill-video" id="progress2"></div>
+                    </div>
+                    <div class="time-display" id="time2">00:00 / 00:00</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="sketch-section">
+            <div class="sketch-title">КЛЮЧНИК (БОСС 1) — HIGH POLY</div>
+            <div class="asset-grid">
+                <div class="asset-item" style="background:url('images/keynik/keynik-front.jpg')center/cover;border-color:var(--copper);"></div>
+                <div class="asset-item" style="background:url('images/keynik/keynik-back.jpg')center/cover;border-color:var(--copper);"></div>
+                <div class="asset-item" style="background:url('images/keynik/keynik-left.jpg')center/cover;border-color:var(--copper);"></div>
+                <div class="asset-item" style="background:url('images/keynik/keynik-right.jpg')center/cover;border-color:var(--copper);"></div>
+            </div>
+        </div>
+
+        <div class="sketch-section">
+            <div class="sketch-title">ЭСКИЗЫ КАРАНДАШОМ</div>
+            <div class="sketch-grid">
+                <div class="sketch-item" style="background:url('images/sketches/vitya-front.jpg')center/cover;"></div>
+                <div class="sketch-item" style="background:url('images/sketches/vitya-profile.jpg')center/cover;"></div>
+                <div class="sketch-item" style="background:url('images/sketches/vitya-action.jpg')center/cover;"></div>
+                <div class="sketch-item" style="background:url('images/sketches/kostya-front.jpg')center/cover;"></div>
+                <div class="sketch-item" style="background:url('images/sketches/kostya-profile.jpg')center/cover;"></div>
+                <div class="sketch-item" style="background:url('images/sketches/kostya-prosthesis.jpg')center/cover;"></div>
+                <div class="sketch-item" style="background:url('images/sketches/keynik-sketch.jpg')center/cover;"></div>
+                <div class="sketch-item" style="background:url('images/sketches/mortimer-sketch.jpg')center/cover;"></div>
+                <div class="sketch-item" style="background:url('images/sketches/captain-sketch.jpg')center/cover;"></div>
+                <div class="sketch-item" style="background:url('images/sketches/spider-robot.jpg')center/cover;"></div>
+                <div class="sketch-item" style="background:url('images/sketches/world-concept.jpg')center/cover;"></div>
+            </div>
+        </div>
+
+        <div class="progress-section">
+            <div class="progress-title">СТАТУС РАЗРАБОТКИ</div>
+            
+            <div class="progress-item">
+                <div class="progress-label">
+                    <span>СЮЖЕТ / СЦЕНАРИЙ</span>
+                    <span>100%</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 100%; background: var(--green); box-shadow: 0 0 15px var(--green);"></div>
+                </div>
+            </div>
+
+            <div class="progress-item">
+                <div class="progress-label">
+                    <span>КОНЦЕПТ-АРТ / ЭСКИЗЫ</span>
+                    <span>70%</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 70%;"></div>
+                </div>
+            </div>
+
+            <div class="progress-item">
+                <div class="progress-label">
+                    <span>3D ПЕРСОНАЖИ</span>
+                    <span>5%</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 5%;"></div>
+                </div>
+            </div>
+
+            <div class="progress-item">
+                <div class="progress-label">
+                    <span>УРОВНИ / ГЕЙМПЛЕЙ</span>
+                    <span>0%</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 0%; background: var(--heat);"></div>
+                </div>
+            </div>
+
+            <div class="progress-item">
+                <div class="progress-label">
+                    <span>АНИМАЦИЯ</span>
+                    <span>0%</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 0%;"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="missing">
+            ⚠ НЕ ХВАТАЕТ: АНИМАТОРА, LEVEL DESIGNER, UE SPECIALIST<br>
+            <a href="join.html">ПРИСОЕДИНИТЬСЯ К РАЗРАБОТКЕ →</a>
+        </div>
+    </div>
+
+    <script>
+        function togglePlay(videoId) {
+            const video = document.getElementById(videoId);
+            const btn = event.target;
+            if (video.paused) {
+                video.play();
+                btn.innerHTML = '⏸';
+            } else {
+                video.pause();
+                btn.innerHTML = '▶';
+            }
+        }
+
+        function toggleMute(videoId) {
+            const video = document.getElementById(videoId);
+            const btn = document.getElementById('mute' + videoId.slice(-1));
+            const volSlider = document.getElementById('vol' + videoId.slice(-1));
+            
+            video.muted = !video.muted;
+            btn.classList.toggle('muted');
+            
+            if (video.muted) {
+                volSlider.value = 0;
+            } else {
+                volSlider.value = video.volume * 100 || 50;
+                video.volume = volSlider.value / 100;
+            }
+        }
+
+        function setVolume(videoId, value) {
+            const video = document.getElementById(videoId);
+            const btn = document.getElementById('mute' + videoId.slice(-1));
+            video.volume = value / 100;
+            video.muted = value == 0;
+            
+            if (value == 0) {
+                btn.classList.add('muted');
+            } else {
+                btn.classList.remove('muted');
+            }
+        }
+
+        function seekVideo(event, videoId) {
+            const video = document.getElementById(videoId);
+            const container = event.currentTarget;
+            const rect = container.getBoundingClientRect();
+            const pos = (event.clientX - rect.left) / rect.width;
+            video.currentTime = pos * video.duration;
+        }
+
+        function formatTime(seconds) {
+            if (isNaN(seconds)) return '00:00';
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        ['video1', 'video2'].forEach((id, index) => {
+            const video = document.getElementById(id);
+            const progressBar = document.getElementById('progress' + (index + 1));
+            const timeDisplay = document.getElementById('time' + (index + 1));
+            const playBtn = document.querySelectorAll('.play-btn')[index];
+            
+            video.addEventListener('timeupdate', () => {
+                const percent = (video.currentTime / video.duration) * 100;
+                progressBar.style.width = percent + '%';
+                timeDisplay.textContent = `${formatTime(video.currentTime)} / ${formatTime(video.duration)}`;
+            });
+            
+            video.addEventListener('ended', () => {
+                playBtn.innerHTML = '▶';
+            });
+            
+            video.muted = true;
+        });
+    </script>
+</body>
+</html>

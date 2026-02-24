@@ -1,0 +1,459 @@
+<!-- mechanics.html - Механики игры -->
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CO-OP OR DIE - Механики</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=JetBrains+Mono:wght@400;700&family=VT323&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --bg-crt: #0a0a0a;
+            --phosphor: #33ff00;
+            --phosphor-dim: #1a8000;
+            --copper: #CD7F32;
+            --amber: #FFB000;
+            --heat: #FF4500;
+        }
+
+        body {
+            background: var(--bg-crt);
+            color: var(--phosphor);
+            font-family: 'VT323', monospace;
+            min-height: 100vh;
+        }
+
+        .scanlines {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(to bottom, rgba(255,255,255,0) 50%, rgba(0,0,0,0.2) 50%);
+            background-size: 100% 4px;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+            position: relative;
+            z-index: 10;
+        }
+
+        .terminal-header {
+            border-bottom: 2px solid var(--phosphor);
+            padding-bottom: 1rem;
+            margin-bottom: 3rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .back-btn {
+            color: var(--phosphor);
+            text-decoration: none;
+            border: 1px solid var(--phosphor);
+            padding: 0.5rem 1rem;
+            transition: all 0.3s;
+        }
+
+        .back-btn:hover {
+            background: var(--phosphor);
+            color: #000;
+        }
+
+        .header-title {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 2rem;
+            letter-spacing: 0.2em;
+            color: var(--copper);
+        }
+
+        /* Blueprint Grid */
+        .blueprint-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .blueprint-card {
+            background: rgba(51, 255, 0, 0.03);
+            border: 1px solid var(--phosphor-dim);
+            padding: 2rem;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s;
+        }
+
+        .blueprint-card:hover {
+            border-color: var(--phosphor);
+            box-shadow: 0 0 30px rgba(51, 255, 0, 0.1);
+            transform: translateY(-5px);
+        }
+
+        .blueprint-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                linear-gradient(rgba(51, 255, 0, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(51, 255, 0, 0.03) 1px, transparent 1px);
+            background-size: 20px 20px;
+            pointer-events: none;
+        }
+
+        .mechanic-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: var(--copper);
+        }
+
+        .mechanic-title {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.8rem;
+            color: var(--amber);
+            margin-bottom: 1rem;
+            border-bottom: 1px dashed var(--copper);
+            padding-bottom: 0.5rem;
+        }
+
+        .mechanic-desc {
+            font-size: 1.2rem;
+            line-height: 1.6;
+            color: var(--phosphor);
+        }
+
+        .mechanic-detail {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: rgba(0,0,0,0.5);
+            border-left: 3px solid var(--copper);
+            font-size: 1.1rem;
+        }
+
+        /* Character Comparison */
+        .character-showcase {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            margin: 3rem 0;
+            padding: 2rem;
+            border: 2px solid var(--copper);
+            background: rgba(205, 127, 50, 0.05);
+        }
+
+        .character-card {
+            text-align: center;
+        }
+
+        .character-visual {
+            width: 200px;
+            height: 200px;
+            margin: 0 auto 1rem;
+            border: 3px solid var(--copper);
+            border-radius: 50%;
+            background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .character-visual::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+            animation: shine 3s infinite;
+        }
+
+        @keyframes shine {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .character-name {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 2rem;
+            color: var(--amber);
+            margin-bottom: 0.5rem;
+        }
+
+        .stats {
+            text-align: left;
+            margin-top: 1rem;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        .stat-bar {
+            width: 100px;
+            height: 10px;
+            background: #1a1a1a;
+            border: 1px solid var(--phosphor-dim);
+            position: relative;
+        }
+
+        .stat-fill {
+            height: 100%;
+            background: var(--phosphor);
+            box-shadow: 0 0 10px var(--phosphor);
+        }
+
+        .elias .stat-fill { background: var(--amber); box-shadow: 0 0 10px var(--amber); }
+        .clayton .stat-fill { background: var(--copper); box-shadow: 0 0 10px var(--copper); }
+
+        /* Interactive Demo Area */
+        .demo-area {
+            border: 2px dashed var(--copper);
+            padding: 2rem;
+            text-align: center;
+            margin: 3rem 0;
+            position: relative;
+        }
+
+        .demo-area::before {
+            content: 'ИНТЕРАКТИВНАЯ ДЕМОНСТРАЦИЯ';
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--bg-crt);
+            padding: 0 1rem;
+            color: var(--copper);
+        }
+
+        .puzzle-demo {
+            display: grid;
+            grid-template-columns: repeat(3, 80px);
+            gap: 10px;
+            justify-content: center;
+            margin: 2rem 0;
+        }
+
+        .gear-slot {
+            width: 80px;
+            height: 80px;
+            border: 2px solid var(--phosphor-dim);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: rgba(0,0,0,0.5);
+        }
+
+        .gear-slot:hover {
+            border-color: var(--phosphor);
+            background: rgba(51, 255, 0, 0.1);
+            transform: rotate(90deg);
+        }
+
+        .gear-slot.filled {
+            border-color: var(--copper);
+            color: var(--copper);
+        }
+
+        @media (max-width: 768px) {
+            .character-showcase { grid-template-columns: 1fr; }
+            .blueprint-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="scanlines"></div>
+    
+    <div class="container">
+        <div class="terminal-header">
+            <a href="index.html" class="back-btn">← НАЗАД</a>
+            <div class="header-title">ТЕХНИЧЕСКАЯ ДОКУМЕНТАЦИЯ</div>
+            <div style="color: var(--copper);">FILE: MECHANICS.DAT</div>
+        </div>
+
+        <div class="blueprint-grid">
+            <div class="blueprint-card">
+                <div class="mechanic-icon">⚙</div>
+                <h3 class="mechanic-title">ПАРОВАЯ ФИЗИКА</h3>
+                <p class="mechanic-desc">
+                    Все механизмы работают на пару. Игроки должны следить за давлением в трубах, 
+                    перекрывать клапаны и использовать пар как оружие против врагов.
+                </p>
+                <div class="mechanic-detail">
+                    <strong>Особенность:</strong> Перегретый пар взрывается, создавая новые проходы
+                </div>
+            </div>
+
+            <div class="blueprint-card">
+                <div class="mechanic-icon">🔧</div>
+                <h3 class="mechanic-title">КРАФТ НА ХОДУ</h3>
+                <p class="mechanic-desc">
+                    Элиас собирает детали из мусора и создает инструменты. 
+                    Клейтон использует свою силу, чтобы ломать препятствия.
+                </p>
+                <div class="mechanic-detail">
+                    <strong>Синергия:</strong> Вместе они могут чинить сломанные лифты между уровнями
+                </div>
+            </div>
+
+            <div class="blueprint-card">
+                <div class="mechanic-icon">🔑</div>
+                <h3 class="mechanic-title">СИСТЕМА КЛЮЧЕЙ</h3>
+                <p class="mechanic-desc">
+                    Латунный Ключ — не просто предмет. Это механизм, требующий двух рук. 
+                    Один держит, другой проворачивает. Тайминг критичен.
+                </p>
+                <div class="mechanic-detail">
+                    <strong>Риск:</strong> Неправильное использование ломает ключ и блокирует путь
+                </div>
+            </div>
+
+            <div class="blueprint-card">
+                <div class="mechanic-icon">👥</div>
+                <h3 class="mechanic-title">АСИММЕТРИЧНЫЙ КООП</h3>
+                <p class="mechanic-desc">
+                    Два разных персонажа с уникальными способностями. 
+                    Загадки требуют одновременных действий обоих игроков.
+                </p>
+                <div class="mechanic-detail">
+                    <strong>Пример:</strong> Элиас лезет по вентиляции, Клейтон держит дверь
+                </div>
+            </div>
+        </div>
+
+        <h2 style="font-family: 'Bebas Neue', sans-serif; font-size: 2rem; color: var(--copper); margin-bottom: 2rem; text-align: center;">
+            === ПЕРСОНАЖИ ===
+        </h2>
+
+        <div class="character-showcase">
+            <div class="character-card elias">
+                <div class="character-visual">⚡</div>
+                <div class="character-name">ЭЛИАС (ИГРОК 1)</div>
+                <p style="color: var(--amber); margin-bottom: 1rem;">Младший брат | Механик-изобретатель</p>
+                <div class="stats">
+                    <div class="stat-row">
+                        <span>Скорость</span>
+                        <div class="stat-bar"><div class="stat-fill" style="width: 90%;"></div></div>
+                    </div>
+                    <div class="stat-row">
+                        <span>Сила</span>
+                        <div class="stat-bar"><div class="stat-fill" style="width: 40%;"></div></div>
+                    </div>
+                    <div class="stat-row">
+                        <span>Ловкость</span>
+                        <div class="stat-bar"><div class="stat-fill" style="width: 95%;"></div></div>
+                    </div>
+                    <div class="stat-row">
+                        <span>Крафт</span>
+                        <div class="stat-bar"><div class="stat-fill" style="width: 100%;"></div></div>
+                    </div>
+                </div>
+                <div style="margin-top: 1rem; padding: 1rem; background: rgba(255,176,0,0.1); border-left: 3px solid var(--amber); text-align: left;">
+                    <strong>Способность:</strong> Лезет по стенам, пролезает в щели, чинит механизмы
+                </div>
+            </div>
+
+            <div class="character-card clayton">
+                <div class="character-visual">🔩</div>
+                <div class="character-name">КЛЕЙТОН (ИГРОК 2)</div>
+                <p style="color: var(--copper); margin-bottom: 1rem;">Старший брат | Паровой киборг</p>
+                <div class="stats">
+                    <div class="stat-row">
+                        <span>Скорость</span>
+                        <div class="stat-bar"><div class="stat-fill" style="width: 50%;"></div></div>
+                    </div>
+                    <div class="stat-row">
+                        <span>Сила</span>
+                        <div class="stat-bar"><div class="stat-fill" style="width: 100%;"></div></div>
+                    </div>
+                    <div class="stat-row">
+                        <span>Выносливость</span>
+                        <div class="stat-bar"><div class="stat-fill" style="width: 90%;"></div></div>
+                    </div>
+                    <div class="stat-row">
+                        <span>Паровой удар</span>
+                        <div class="stat-bar"><div class="stat-fill" style="width: 85%;"></div></div>
+                    </div>
+                </div>
+                <div style="margin-top: 1rem; padding: 1rem; background: rgba(205,127,50,0.1); border-left: 3px solid var(--copper); text-align: left;">
+                    <strong>Способность:</strong> Ломает стены, тащит тяжести, защищает брата
+                </div>
+            </div>
+        </div>
+
+        <div class="demo-area">
+            <h3 style="font-family: 'Bebas Neue', sans-serif; font-size: 1.5rem; color: var(--copper); margin-bottom: 1rem;">
+                ДЕМО: СИНХРОНИЗАЦИЯ ШЕСТЕРЕНОК
+            </h3>
+            <p style="margin-bottom: 2rem;">Кликните, чтобы собрать механизм (оба игрока должны активировать)</p>
+            
+            <div class="puzzle-demo" id="gearPuzzle">
+                <div class="gear-slot" onclick="toggleGear(this)">⚙</div>
+                <div class="gear-slot" onclick="toggleGear(this)">⚙</div>
+                <div class="gear-slot" onclick="toggleGear(this)">⚙</div>
+                <div class="gear-slot" onclick="toggleGear(this)">⚙</div>
+                <div class="gear-slot" onclick="toggleGear(this)">⚙</div>
+                <div class="gear-slot" onclick="toggleGear(this)">⚙</div>
+                <div class="gear-slot" onclick="toggleGear(this)">⚙</div>
+                <div class="gear-slot" onclick="toggleGear(this)">⚙</div>
+                <div class="gear-slot" onclick="toggleGear(this)">⚙</div>
+            </div>
+
+            <div id="puzzleStatus" style="color: var(--phosphor-dim); margin-top: 1rem;">
+                ОЖИДАНИЕ ДЕЙСТВИЙ ОБОИХ ИГРОКОВ...
+            </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 3rem;">
+            <p style="color: var(--copper); font-size: 1.2rem; margin-bottom: 1rem;">
+                НУЖНЫ ЛЮДИ ДЛЯ РЕАЛИЗАЦИИ ЭТИХ МЕХАНИК
+            </p>
+            <a href="crew.html" style="display: inline-block; padding: 1rem 2rem; background: var(--copper); color: #000; text-decoration: none; font-family: 'Bebas Neue', sans-serif; font-size: 1.3rem; letter-spacing: 0.2em;">
+                СТАТЬ ЧАСТЬЮ КОМАНДЫ →
+            </a>
+        </div>
+    </div>
+
+    <script>
+        let filledGears = 0;
+        function toggleGear(element) {
+            if (element.classList.contains('filled')) {
+                element.classList.remove('filled');
+                filledGears--;
+            } else {
+                element.classList.add('filled');
+                filledGears++;
+                
+                // Play click sound effect (visual feedback)
+                element.style.transform = 'scale(0.9)';
+                setTimeout(() => element.style.transform = 'scale(1)', 100);
+            }
+            
+            const status = document.getElementById('puzzleStatus');
+            if (filledGears === 9) {
+                status.textContent = '✓ МЕХАНИЗМ АКТИВИРОВАН! ДВЕРЬ ОТКРЫТА.';
+                status.style.color = 'var(--amber)';
+            } else {
+                status.textContent = `ПРОГРЕСС: ${filledGears}/9 ШЕСТЕРЕНОК...`;
+                status.style.color = 'var(--phosphor)';
+            }
+        }
+    </script>
+</body>
+</html>

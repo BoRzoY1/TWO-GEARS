@@ -1,0 +1,381 @@
+<!-- bros.html - Анкета братьев -->
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>БРАТЬЯ & КО - О нас</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=JetBrains+Mono:wght@400;700&family=VT323&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --amber: #FFB000;
+            --amber-dim: #8B6914;
+            --green: #33ff00;
+            --copper: #CD7F32;
+            --dark: #0a0a0a;
+        }
+
+        body {
+            background: var(--dark);
+            color: var(--amber);
+            font-family: 'VT323', monospace;
+            min-height: 100vh;
+        }
+
+        .scanlines {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(to bottom, rgba(255,255,255,0) 50%, rgba(0,0,0,0.3) 50%);
+            background-size: 100% 4px;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        .bezel {
+            position: fixed;
+            top: 20px; left: 20px; right: 20px; bottom: 20px;
+            border: 30px solid #2a2a2a;
+            border-radius: 20px;
+            box-shadow: inset 0 0 100px rgba(0,0,0,0.8), 0 0 0 10px #1a1a1a, 0 0 0 15px var(--copper);
+            pointer-events: none;
+            z-index: 200;
+        }
+
+        .screen {
+            position: absolute;
+            top: 40px; left: 40px; right: 40px; bottom: 40px;
+            padding: 3rem;
+            overflow-y: auto;
+            z-index: 10;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--amber);
+            padding-bottom: 1rem;
+            margin-bottom: 3rem;
+        }
+
+        .back-btn {
+            color: var(--amber);
+            text-decoration: none;
+            border: 1px solid var(--amber);
+            padding: 0.5rem 1rem;
+            transition: all 0.3s;
+        }
+
+        .back-btn:hover {
+            background: var(--amber);
+            color: #000;
+        }
+
+        .title {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 2rem;
+            letter-spacing: 0.2em;
+        }
+
+        /* ID Cards */
+        .bros-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            margin-bottom: 3rem;
+        }
+
+        .id-card {
+            background: rgba(255, 176, 0, 0.05);
+            border: 2px solid var(--amber);
+            padding: 2rem;
+            position: relative;
+        }
+
+        .id-card::before {
+            content: 'ID CARD';
+            position: absolute;
+            top: -12px;
+            left: 20px;
+            background: var(--dark);
+            padding: 0 10px;
+            color: var(--amber);
+            font-size: 0.9rem;
+        }
+
+        .photo-placeholder {
+            width: 150px;
+            height: 180px;
+            background: #1a1a1a;
+            border: 2px solid var(--amber-dim);
+            margin: 0 auto 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+            position: relative;
+        }
+
+        .photo-placeholder::after {
+            content: '[ФОТО]';
+            position: absolute;
+            bottom: 5px;
+            font-size: 0.8rem;
+            color: var(--amber-dim);
+        }
+
+        .id-name {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 2rem;
+            text-align: center;
+            margin-bottom: 0.5rem;
+            letter-spacing: 0.1em;
+        }
+
+        .id-role {
+            text-align: center;
+            color: var(--copper);
+            font-size: 1.2rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px dashed var(--amber-dim);
+            padding-bottom: 1rem;
+        }
+
+        .id-stats {
+            font-size: 1.1rem;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            padding: 0.3rem 0;
+            border-bottom: 1px dotted var(--amber-dim);
+        }
+
+        .stat-label {
+            color: var(--amber-dim);
+        }
+
+        .stat-bar {
+            width: 100px;
+            height: 12px;
+            background: #1a1a1a;
+            border: 1px solid var(--amber-dim);
+            position: relative;
+        }
+
+        .stat-fill {
+            height: 100%;
+            background: var(--amber);
+        }
+
+        .vitya .stat-fill { background: #ff6666; }
+        .kostya .stat-fill { background: #66ff66; }
+
+        /* Shop info */
+        .shop-section {
+            border: 2px solid var(--copper);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            background: rgba(205, 127, 50, 0.05);
+        }
+
+        .shop-section h3 {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.8rem;
+            color: var(--copper);
+            margin-bottom: 1rem;
+            border-bottom: 1px solid var(--copper);
+            padding-bottom: 0.5rem;
+        }
+
+        .shop-text {
+            font-size: 1.3rem;
+            line-height: 1.8;
+        }
+
+        .highlight {
+            color: var(--copper);
+            font-weight: bold;
+        }
+
+        /* Skills comparison */
+        .skills-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .skill-item {
+            border: 1px solid var(--amber-dim);
+            padding: 1rem;
+            text-align: center;
+            font-size: 1.1rem;
+        }
+
+        .skill-item.vitya {
+            border-color: #ff6666;
+            background: rgba(255, 102, 102, 0.05);
+        }
+
+        .skill-item.kostya {
+            border-color: #66ff66;
+            background: rgba(102, 255, 102, 0.05);
+        }
+
+        @media (max-width: 768px) {
+            .bros-container { grid-template-columns: 1fr; }
+            .skills-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="scanlines"></div>
+    <div class="bezel"></div>
+    
+    <div class="screen">
+        <div class="header">
+            <a href="index.html" class="back-btn">← НАЗАД</a>
+            <div class="title">ЛИЧНЫЕ ДЕЛА</div>
+            <div style="color:var(--amber-dim);">DATABASE: EMPLOYEES</div>
+        </div>
+
+        <div class="bros-container">
+            <!-- Vitya -->
+            <div class="id-card vitya">
+                <div class="photo-placeholder">👤</div>
+                <div class="id-name">ВИКТОР</div>
+                <div class="id-role">"ВИТЯ" • КАССИР / ЗАКУПЩИК</div>
+                
+                <div class="id-stats">
+                    <div class="stat-row">
+                        <span class="stat-label">ВОЗРАСТ:</span>
+                        <span>24 года</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">РОСТ:</span>
+                        <span>178 см</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">ХАРАКТЕР:</span>
+                        <span>Оптимист, болтун</span>
+                    </div>
+                    
+                    <div style="margin-top:1rem;">
+                        <div class="stat-row">
+                            <span class="stat-label">ОБЩЕНИЕ</span>
+                            <div class="stat-bar"><div class="stat-fill" style="width:95%;"></div></div>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-label">ТЕХНИКА</span>
+                            <div class="stat-bar"><div class="stat-fill" style="width:30%;"></div></div>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-label">УДАЧА</span>
+                            <div class="stat-bar"><div class="stat-fill" style="width:90%;"></div></div>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-label">СКОРОСТЬ</span>
+                            <div class="stat-bar"><div class="stat-fill" style="width:85%;"></div></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="skills-grid" style="margin-top:1.5rem;">
+                    <div class="skill-item vitya">Убеждение</div>
+                    <div class="skill-item vitya">Поиск сокровищ</div>
+                    <div class="skill-item vitya">Бегство</div>
+                    <div class="skill-item vitya">Оптимизм</div>
+                </div>
+            </div>
+
+            <!-- Kostya -->
+            <div class="id-card kostya">
+                <div class="photo-placeholder">👤</div>
+                <div class="id-name">КОНСТАНТИН</div>
+                <div class="id-role">"КОСТЯ" • МАСТЕР / РЕМОНТНИК</div>
+                
+                <div class="id-stats">
+                    <div class="stat-row">
+                        <span class="stat-label">ВОЗРАСТ:</span>
+                        <span>28 лет</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">РОСТ:</span>
+                        <span>185 см</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">ХАРАКТЕР:</span>
+                        <span>Циник, мастер</span>
+                    </div>
+                    
+                    <div style="margin-top:1rem;">
+                        <div class="stat-row">
+                            <span class="stat-label">РЕМОНТ</span>
+                            <div class="stat-bar"><div class="stat-fill" style="width:100%;"></div></div>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-label">СИЛА</span>
+                            <div class="stat-bar"><div class="stat-fill" style="width:90%;"></div></div>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-label">ТЕРПЕНИЕ</span>
+                            <div class="stat-bar"><div class="stat-fill" style="width:40%;"></div></div>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-label">СКРУПУЛЁЗНОСТЬ</span>
+                            <div class="stat-bar"><div class="stat-fill" style="width:95%;"></div></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="skills-grid" style="margin-top:1.5rem;">
+                    <div class="skill-item kostya">Механика</div>
+                    <div class="skill-item kostya">Электроника</div>
+                    <div class="skill-item kostya">Сварка</div>
+                    <div class="skill-item kostya">Паровые системы</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="shop-section">
+            <h3>⚙ О МАГАЗИНЕ "БРАТЬЯ & КО"</h3>
+            <div class="shop-text">
+                <p style="margin-bottom:1rem;">
+                    Мы работаем в <span class="highlight">старом районе</span>, где люди выбрасывают вещи, 
+                    а мы находим им вторую жизнь. <span class="highlight">Витя</span> находит покупателей и 
+                    закупает "хлам" (как он это называет). <span class="highlight">Костя</span> чинит — 
+                    от старых телевизоров до механических часов.
+                </p>
+                <p style="margin-bottom:1rem;">
+                    Мы братья, но совершенно разные. Витя верит в чудеса, Костя — в механизмы. 
+                    Вместе мы команда, которая может починить всё. 
+                    <span class="highlight">Или почти всё.</span>
+                </p>
+                <p>
+                    Последняя находка — старая игровая приставка — изменила всё. 
+                    Мы не знали, что некоторые механизмы чинить нельзя. 
+                    Некоторые механизмы <span class="highlight" style="color:var(--green);">нужно оставить в покое</span>.
+                </p>
+            </div>
+        </div>
+
+        <div class="shop-section" style="border-color:var(--green);">
+            <h3 style="color:var(--green);">⚠ СТАТУС: ПРОПАВШИЕ БЕЗ ВЕСТИ</h3>
+            <div class="shop-text">
+                <p>
+                    Если вы видите это сообщение — мы застряли внутри игры. 
+                    Этот терминал остался работать, пока мы исследуем мир по ту сторону экрана.
+                </p>
+                <p style="margin-top:1rem;color:var(--amber-dim);">
+                    Мы документируем всё, что видим. Помогите нам закончить эту историю.
+                </p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
